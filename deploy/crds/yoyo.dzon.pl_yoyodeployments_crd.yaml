@@ -1,0 +1,245 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: yoyodeployments.yoyo.dzon.pl
+spec:
+  group: yoyo.dzon.pl
+  names:
+    kind: YoyoDeployment
+    listKind: YoyoDeploymentList
+    plural: yoyodeployments
+    singular: yoyodeployment
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: YoyoDeployment is the Schema for the yoyodeployments API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: YoyoDeploymentSpec defines the desired state of YoyoDeployment
+          properties:
+            containers:
+              description: Containers is a list of application containers being part
+                of the deployment
+              items:
+                description: Container defines  application container that will be
+                  run as part of the deployment
+                properties:
+                  healthCheck:
+                    description: HealtCheck defines how health of the container is
+                      verified
+                    properties:
+                      exec:
+                        description: One and only one of the following should be specified.
+                          Exec specifies the action to take.
+                        properties:
+                          command:
+                            description: Command is the command line to execute inside
+                              the container, the working directory for the command  is
+                              root ('/') in the container's filesystem. The command
+                              is simply exec'd, it is not run inside a shell, so traditional
+                              shell instructions ('|', etc) won't work. To use a shell,
+                              you need to explicitly call out to that shell. Exit
+                              status of 0 is treated as live/healthy and non-zero
+                              is unhealthy.
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      failureThreshold:
+                        description: Minimum consecutive failures for the probe to
+                          be considered failed after having succeeded. Defaults to
+                          3. Minimum value is 1.
+                        format: int32
+                        type: integer
+                      httpGet:
+                        description: HTTPGet specifies the http request to perform.
+                        properties:
+                          host:
+                            description: Host name to connect to, defaults to the
+                              pod IP. You probably want to set "Host" in httpHeaders
+                              instead.
+                            type: string
+                          httpHeaders:
+                            description: Custom headers to set in the request. HTTP
+                              allows repeated headers.
+                            items:
+                              description: HTTPHeader describes a custom header to
+                                be used in HTTP probes
+                              properties:
+                                name:
+                                  description: The header field name
+                                  type: string
+                                value:
+                                  description: The header field value
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                          path:
+                            description: Path to access on the HTTP server.
+                            type: string
+                          port:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            description: Name or number of the port to access on the
+                              container. Number must be in the range 1 to 65535. Name
+                              must be an IANA_SVC_NAME.
+                            x-kubernetes-int-or-string: true
+                          scheme:
+                            description: Scheme to use for connecting to the host.
+                              Defaults to HTTP.
+                            type: string
+                        required:
+                        - port
+                        type: object
+                      initialDelaySeconds:
+                        description: 'Number of seconds after the container has started
+                          before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
+                        format: int32
+                        type: integer
+                      periodSeconds:
+                        description: How often (in seconds) to perform the probe.
+                          Default to 10 seconds. Minimum value is 1.
+                        format: int32
+                        type: integer
+                      successThreshold:
+                        description: Minimum consecutive successes for the probe to
+                          be considered successful after having failed. Defaults to
+                          1. Must be 1 for liveness and startup. Minimum value is
+                          1.
+                        format: int32
+                        type: integer
+                      tcpSocket:
+                        description: 'TCPSocket specifies an action involving a TCP
+                          port. TCP hooks not yet supported TODO: implement a realistic
+                          TCP lifecycle hook'
+                        properties:
+                          host:
+                            description: 'Optional: Host name to connect to, defaults
+                              to the pod IP.'
+                            type: string
+                          port:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            description: Number or name of the port to access on the
+                              container. Number must be in the range 1 to 65535. Name
+                              must be an IANA_SVC_NAME.
+                            x-kubernetes-int-or-string: true
+                        required:
+                        - port
+                        type: object
+                      timeoutSeconds:
+                        description: 'Number of seconds after which the probe times
+                          out. Defaults to 1 second. Minimum value is 1. More info:
+                          https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
+                        format: int32
+                        type: integer
+                    type: object
+                  image:
+                    description: Image defines the container image that will be started
+                    type: string
+                  name:
+                    description: Name specifies the name of the container
+                    type: string
+                  ports:
+                    description: Ports specifies list of ports to expose from the
+                      container
+                    items:
+                      description: ContainerPort defines network port
+                      properties:
+                        portNumber:
+                          description: PortNumber is the number of the network port
+                          format: int32
+                          type: integer
+                        protocol:
+                          description: Protocol specifies protocol for which the port
+                            is defined
+                          type: string
+                        servicePort:
+                          description: ServicePort specifies port number that should
+                            be used to map to this container port
+                          format: int32
+                          type: integer
+                      required:
+                      - portNumber
+                      - protocol
+                      - servicePort
+                      type: object
+                    type: array
+                required:
+                - image
+                - name
+                type: object
+              type: array
+            rollbackPolicy:
+              description: RollbackPolicy defines how a rollback of the deployment
+                should be executed
+              type: string
+          required:
+          - containers
+          type: object
+        status:
+          description: YoyoDeploymentStatus defines the observed state of a Yoyo Deployment
+          properties:
+            conditions:
+              description: Current service state of the deployment.
+              items:
+                description: YoyoDeploymentCondition defines the observed state of
+                  YoyoDeploymentCondition conditions
+                properties:
+                  lastHeartbeatTime:
+                    description: The last time we got an update on a given condition
+                    format: date-time
+                    type: string
+                  lastTransitionTime:
+                    description: The last time the condition transit from one status
+                      to another
+                    format: date-time
+                    type: string
+                  message:
+                    description: A human-readable message indicating details about
+                      last transition
+                    type: string
+                  reason:
+                    description: A brief CamelCase string that describes why the Yoyo
+                      Deployment is in current condition status
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown
+                    type: string
+                  type:
+                    description: Type of virtual machine import condition
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            deploymentName:
+              description: DeploymentName reports the name of dependant k8s Deployment
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true

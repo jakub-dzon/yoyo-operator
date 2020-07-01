@@ -1,0 +1,8 @@
+apiVersion: yoyo.dzon.pl/v1alpha1
+kind: YoyoDeployment
+metadata:
+  name: example
+spec:
+  containers:
+    - name: foobar
+      image: foobar:latest
